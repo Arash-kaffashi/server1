@@ -98,6 +98,52 @@ app.delete("/delete/:id", (req: Request, res: Response) => {
   return res.status(200).json(db);
 });
 
+/*
+Acessar um processo pelo ID GET /process/:id
+Adicionar um comentário a array de comentários PUT /addComment/:id
+Acessar todos processos em andamento GET /status/open
+Acessar todos processos finalizados GET /status/close
+*/
+
+app.get("/process/:id", (req: Request, res: Response) => {
+  const { id } = req.params;
+  const reqProcess = db.find((obj) => obj.id === id);
+
+  if (reqProcess === undefined) return res.status(404).json(db);
+
+  return res.status(200).json(reqProcess);
+});
+
+app.put("/addComment/:id", (req: Request, res: Response) => {
+  const { id } = req.params;
+  const reqProcess = db.find((obj) => obj.id === id);
+
+  if (reqProcess === undefined) return res.status(404).json(db);
+
+  const { comment } = req.body;
+
+  if (Array.isArray(comment)) reqProcess.comments.push(...comment);
+  else if (typeof comment === "string") reqProcess.comments.push(comment);
+  else
+    return res
+      .status(403)
+      .json({ msg: `Forbiden. 'comment' is ${typeof comment}` });
+
+  return res.status(200).json(reqProcess);
+});
+
+app.get("/status/:status", (req: Request, res: Response) => {
+  const status = { open: "Em andamento", close: "Finalizado" }[
+    req.params.status
+  ];
+
+  let found = db.filter((obj) => obj.status === status);
+
+  if (found.length === 0) return res.status(404).json(db);
+
+  return res.status(200).json(found);
+});
+
 app.listen(process.env.PORT, () => {
   console.log(
     `⚡️[server]: Server is running at http://localhost:${process.env.PORT}`
