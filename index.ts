@@ -67,6 +67,10 @@ let db: Process[] = [
   },
 ];
 
+function getRandom<T>(list: T[]): T {
+  return list[Math.floor(Math.random() * list.length)];
+}
+
 app.get("/all", (_, res: Response) => {
   return res.status(200).json(db);
 });
@@ -142,6 +146,21 @@ app.get("/status/:status", (req: Request, res: Response) => {
   if (found.length === 0) return res.status(404).json(db);
 
   return res.status(200).json(found);
+});
+
+app.get("/setor/:nomeSetor", (req: Request, res: Response) => {
+  const { nomeSetor } = req.params;
+
+  let found = db.filter(
+    (obj) => obj.setor.toLowerCase() === nomeSetor.toLowerCase()
+  );
+  if (found.length === 0) return res.status(404).json(db);
+
+  return res.status(200).json(found);
+});
+
+app.get("/random", (_, res: Response) => {
+  res.status(200).json(getRandom(db));
 });
 
 app.listen(process.env.PORT, () => {
